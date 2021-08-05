@@ -7,6 +7,7 @@ I. Specific DE/distro/hardware etc. problems:
 II. General:
   1. [Wake-on-LAN with NetworkManager](#wake-on-lan-with-networkmanager)
   2. [Tar cheat sheet & basic functionality](#tar-cheat-sheet--basic-functionality)
+  3. [Automount a drive](#automount-a-drive)
 
 III. Notes:
   1. **Bold** sections should be considered important.
@@ -15,6 +16,8 @@ III. Notes:
   4. The commands/information found in this project are provided without any kind of warranty.
   5. In case of redistribution, be sure to keep and respect the [GPL-3.0 License](https://github.com/sabinM1/linux-pro-tips/blob/master/LICENSE).
 
+---
+
 ## Wake-on-LAN with NetworkManager
 ##### From [wiki.archlinux.org](https://wiki.archlinux.org/title/Wake-on-LAN#NetworkManager)
 
@@ -22,7 +25,7 @@ NetworkManager provides [Wake-on-LAN ethernet support](https://www.phoronix.com/
 
 First, search for the name of the wired connection:
 
-`nmcli con show`:
+`nmcli con show`
 ```
 NAME    UUID                                  TYPE            DEVICE
 wired1  612e300a-c047-4adb-91e2-12ea7bfe214e  802-3-ethernet  enp0s25
@@ -30,7 +33,7 @@ wired1  612e300a-c047-4adb-91e2-12ea7bfe214e  802-3-ethernet  enp0s25
 
 By following, one can view current status of Wake-on-LAN settings:
 
-`nmcli c show "wired1" | grep 802-3-ethernet.wake-on-lan`:
+`nmcli c show "wired1" | grep 802-3-ethernet.wake-on-lan`
 ```
 802-3-ethernet.wake-on-lan:             default
 802-3-ethernet.wake-on-lan-password:    --
@@ -46,7 +49,7 @@ The Wake-on-LAN settings can also be changed from the GUI using [nm-connection-e
 
 You can disable Wake-on-Lan for all connections permanently by adding a dedicated configuration file:
 
-`/etc/NetworkManager/conf.d/''wake-on-lan.conf''`:
+`/etc/NetworkManager/conf.d/wake-on-lan.conf`
 ```
 [connection]
 ethernet.wake-on-lan = ignore
@@ -57,6 +60,7 @@ wifi.wake-on-wlan = ignore
 
 **When using [TLP](https://wiki.archlinux.org/title/TLP) for suspend/hibernate, the `WOL_DISABLE` setting should be set to `N` in `/etc/tlp.conf` to allow resuming the computer with WoL.**
 
+---
 
 ## Tar cheat sheet & basic functionality
 ##### From [haskaalo/tarcheatsheet](https://gist.github.com/haskaalo/68c0ea38e0abc3d4081db6e9446e8253) and [cheat.sh/tar](http://cheat.sh/tar)
@@ -91,3 +95,102 @@ wifi.wake-on-wlan = ignore
 
 ### Extract a specific file without preserving the folder structure
 `tar xf source.tar source.tar/path/to/extract --strip-components=depth_to_strip`
+
+---
+
+## Automount a drive
+##### From [techrepublic.com](https://www.techrepublic.com/article/how-to-properly-automount-a-drive-in-ubuntu-linux/)
+
+### Locate the partition to mount
+
+The first thing to be done is to locate the partition you want to mount. In this case, we'll be working with an entire drive. To do so type:
+
+`sudo fdisk -l`
+
+The output will be similar to the following:
+
+```bash
+Disk /dev/nvme0n1: 465,76 GiB, 500107862016 bytes, 976773168 sectors
+Disk model: KINGSTON SA2000M8500G                   
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: gpt
+Disk identifier: 35121E42-842O-F912-8451-0BO08894A1D8
+
+Device           Start       End   Sectors   Size Type
+/dev/nvme0n1p1    4096   1052671   1048576   512M EFI System
+/dev/nvme0n1p2 1052672 976768064 975715393 465,3G Linux filesystem
+
+
+Disk /dev/sda: 1,82 TiB, 2000398934016 bytes, 3907029168 sectors
+Disk model: WDC WD20EZRZ-00Z
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 4096 bytes
+I/O size (minimum/optimal): 4096 bytes / 4096 bytes
+Disklabel type: gpt
+Disk identifier: 31616826-A6D4-4688-8847-D800B1356D7A 
+
+Device     Start        End    Sectors  Size Type
+/dev/sda1   2048 3907028991 3907026944  1,8T Linux filesystem
+```
+
+In this case the disk I want to automount is *WDC WD20EZRZ-00Z*, located at `/dev/sda`.
+
+### Locate the UUID
+
+Next we need to find the UUID (Universal Unique Identifier) of the drive. To do that, issue the command:
+
+`sudo blkid`
+
+```bash
+/dev/nvme0n1p1: LABEL_FATBOOT="NO_LABEL" LABEL="NO_LABEL" UUID="0FBE-6148" BLOCK_SIZE="512" TYPE="vfat" PARTUUID="e1aba8f4-65d5-4b45-8206-4d5a92e3c105"
+/dev/nvme0n1p2: UUID="3BO08d83-0511-b00b-8bbb-fef71ed2xddd0" BLOCK_SIZE="4096" TYPE="ext4" PARTUUID="614e5ef3-8dec-144a-8543-742d5c824aad"
+/dev/sda1: LABEL="2big" UUID="bb7LM404-a173-4358-996a-2ae010be123c" BLOCK_SIZE="4096" TYPE="ext4" PARTLABEL="2big" PARTUUID="2f52b4a6-66b4-4582-98b0-b1ff8f0b44f8"
+```
+
+In this case the UUID will be `bb7LM404-a173-4358-996a-2ae010be123c`.
+
+### Permissions and mount point
+
+Before we add the entry to fstab, we must first create a mount point for the drive. The mount point is the directory where users will access the data on the drive (as they can't access /dev/sda itself). So let's create a directory called data:
+
+`sudo mkdir /data`
+
+You'll want to also change the group ownership of that directory, so that users can access it. For this, you might create a group called data and then add users to the new group. After you've done that, you could then change the ownership of the mountpoint. All this could be done with the commands:
+
+`sudo groupadd data`<br>
+`sudo usermod -aG data $USER`<br>
+`sudo chown -R :data /data`
+
+### Editing fstab
+
+Start by opening `/etc/fstab` in your favorite editor (e.g. `sudo nano /etc/fstab` or `sudo vi /etc/fstab` etc.)
+
+At the bottom of that file, we'll add an entry that contains the information we've discovered. The entry will look like this:
+
+```bash
+UUID=bb7LM404-a173-4358-996a-2ae010be123c /data    auto nosuid,nodev,nofail,x-gvfs-show 0 0
+```
+
+Breaking that line down, we have:
+
+- `UUID=bb7LM404-a173-4358-996a-2ae010be123c` - is the UUID of the drive. You don't have to use the UUID here. You could just use /dev/sdj, but it's always safer to use the UUID as that will never change (whereas the device name could).
+- `/data` - is the mount point for the device.
+- `auto` - automatically determine the file system
+- `nosuid` - specifies that the filesystem cannot contain set userid files. This prevents root escalation and other security issues.
+- `nodev` - specifies that the filesystem cannot contain special devices (to prevent access to random device hardware).
+- `nofail` - removes the errorcheck.
+- `x-gvfs-show` - show the mount option in the file manager. If this is on a GUI-less server, this option won't be necessary.
+- `0` - determines which filesystems need to be dumped (0 is the default).
+- `0` - determine the order in which filesystem checks are done at boot time (0 is the default).
+
+Save and close the file.
+
+### Testing the entry
+
+**Before you reboot the machine, you need to test your new fstab entry.** To do this, issue the command:
+
+`sudo mount -a`
+
+If you see no errors, the fstab entry is correct and you're safe to reboot. Congratulations, you've just created a proper fstab entry for your connected drive. Your drive will automatically mount every time the machine boots.
