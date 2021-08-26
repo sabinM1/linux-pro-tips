@@ -8,6 +8,7 @@ II. General:
   1. [Wake-on-LAN with NetworkManager](#wake-on-lan-with-networkmanager)
   2. [Tar cheat sheet & basic functionality](#tar-cheat-sheet--basic-functionality)
   3. [Automount a drive](#automount-a-drive)
+  4. [Bash - Output song names from multiple folders to a file](#bash---output-song-names-from-multiple-folders-to-a-file)
 
 III. Notes:
   1. **Bold** sections should be considered important.
@@ -194,3 +195,42 @@ Save and close the file.
 `sudo mount -a`
 
 If you see no errors, the fstab entry is correct and you're safe to reboot. Congratulations, you've just created a proper fstab entry for your connected drive. Your drive will automatically mount every time the machine boots.
+
+## Bash - Output song names from multiple folders to a file
+##### OC
+
+Put the script below in your root music directory and it will output the name of the songs to `albumes.txt`.
+
+### Notes:
+
+If your music does not correspond to the following pattern you can edit the regex in the script (now it's `grep -E '[0-9][0-9]'`):<br>
+`NR Name` eg. `06 Lose Yourself to Dance.flac` or `08. Waltz for Zizi.flac` etc.
+
+Also if you have mp3, wav etc. files you can edit `tr -d .flac` to the respective file type (or include an OR operation).
+
+---
+
+`touch albumes.sh && chmod +x albumes.sh` and edit the file with your preffered editor.
+```bash
+#!/bin/bash
+
+# Forbid root rights
+[ "$EUID" == "0" ] && echo -e "\e[91mDon't use sudo or root user to execute these scripts!\e[0m" && exit
+
+export ALBUME="$PWD/albumes.txt"
+
+cd "$PARENT" || exit
+
+: > "$ALBUME" # clear (and create) file
+
+for dir in ./*/
+do cd -P "$dir" || continue
+   printf %s\\n "$PWD" >&2
+   echo -e "${PWD##*/}\n" >> "$ALBUME" && \ls -lha | cut -d " " -f 12-99 | grep -E '[0-9][0-9]' | tr -d .flac >> "$ALBUME" && echo -e "\n" >> "$ALBUME" && cd "$OLDPWD" || 
+! break; done || ! cd - >&2
+
+echo
+```
+
+(**NOT RECOMMENDED**):<br>
+You can also `curl https://gist.githubusercontent.com/sabinM1/86a06a0785b01842aa316f68ed22f779/raw/albume.sh | bash` in your root music directory (assuming you have curl installed) if you don't want to create a script file **and you trust GitHub and me enough to run unverified scripts on your machine**. [The Gist](https://gist.github.com/sabinM1/86a06a0785b01842aa316f68ed22f779) is public and hopefully the same as the script above, but because there is a "hopefully",  you never know what it's being transmitted to bash if you don't verify it.
