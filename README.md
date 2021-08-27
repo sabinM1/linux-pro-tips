@@ -206,7 +206,7 @@ Put the script below in your root music directory and it will output the name of
 If your music does not correspond to the following pattern you can edit the regex in the script (now it's `grep -E '[0-9][0-9]'`):<br>
 `NR Name` eg. `06 Lose Yourself to Dance.flac` or `08. Waltz for Zizi.flac` etc.
 
-Also if you have mp3, wav etc. files you can edit `tr -d .flac` to the respective file type (or include an OR operation).
+Also if you have mp3, wav etc. files you can edit `sed 's/.flac//g'` to the respective file type (or make an OR operation for multiple types).
 
 ##### There are also two versions for Losslessclub, one for normal albums, web albums, vinyl rips etc. and one for discgraphy, which also includes the duration of the album (you have to edit this manually). If you don't know what I just talked about don't worry. Anyways, you can find them [in this Gist](https://gist.github.com/sabinM1/86a06a0785b01842aa316f68ed22f779).
 
@@ -228,11 +228,11 @@ cd "$PARENT" || exit
 for dir in ./*/
 do cd -P "$dir" || continue
    printf %s\\n "$PWD" >&2
-   echo -e "${PWD##*/}\n" >> "$ALBUME" && \ls -lha | cut -d " " -f 12-99 | grep -E '[0-9][0-9]' | tr -d .flac >> "$ALBUME" && echo -e "\n" >> "$ALBUME" && cd "$OLDPWD" || 
+   echo -e "${PWD##*/}\n" >> "$ALBUME" && \ls -lha | cut -d " " -f 12-99 | grep -E '[0-9][0-9]' | sed 's/.flac//g' >> "$ALBUME" && echo -e "\n" >> "$ALBUME" && cd "$OLDPWD" || 
 ! break; done || ! cd - >&2
 
 echo
 ```
 
 (**NOT RECOMMENDED**):<br>
-You can also `curl https://gist.githubusercontent.com/sabinM1/86a06a0785b01842aa316f68ed22f779/raw/albume.sh | bash` in your root music directory (assuming you have curl installed) if you don't want to create a script file **and you trust GitHub and me enough to run unverified scripts on your machine**. [The Gist](https://gist.github.com/sabinM1/86a06a0785b01842aa316f68ed22f779) is public and hopefully the same as the script above, but because there is a "hopefully",  you never know what it's being transmitted to bash if you don't verify it.
+You can also `curl https://gist.githubusercontent.com/sabinM1/86a06a0785b01842aa316f68ed22f779/raw/albums.sh | bash` in your root music directory (assuming you have curl installed) if you don't want to create a script file **and you trust GitHub and me enough to run unverified scripts on your machine**. [The Gist](https://gist.github.com/sabinM1/86a06a0785b01842aa316f68ed22f779) is public and hopefully the same as the script above, but because there is a "hopefully",  you never know what it's being transmitted to bash if you don't verify it.
