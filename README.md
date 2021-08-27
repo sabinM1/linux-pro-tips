@@ -221,8 +221,6 @@ Also if you have mp3, wav etc. files you can edit `sed 's/.flac//g'` to the resp
 
 export ALBUME="$PWD/albums.txt"
 
-cd "$PARENT" || exit
-
 : > "$ALBUME" # clear (and create) file
 
 for dir in ./*/
