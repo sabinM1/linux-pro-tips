@@ -10,6 +10,7 @@ II. General:
   2. [Tar cheat sheet & basic functionality](#tar-cheat-sheet--basic-functionality)
   3. [Automount a drive](#automount-a-drive)
   4. [Bash - Output song names from multiple folders to a file](#bash---output-song-names-from-multiple-folders-to-a-file)
+  5. [Iptables](#iptables)
 
 III. Notes:
   1. **Bold** sections should be considered important.
@@ -235,3 +236,35 @@ echo
 
 (**NOT RECOMMENDED**):<br>
 You can also `curl https://gist.githubusercontent.com/sabinM1/86a06a0785b01842aa316f68ed22f779/raw/albums.sh | bash` in your root music directory (assuming you have curl installed) if you don't want to create a script file **and you trust GitHub and me enough to run unverified scripts on your machine**. [The Gist](https://gist.github.com/sabinM1/86a06a0785b01842aa316f68ed22f779) is public and hopefully the same as the script above, but because there is a "hopefully",  you never know what it's being transmitted to bash if you don't verify it.
+
+## Iptables
+##### From [thomas-krenn.com](https://www.thomas-krenn.com/en/wiki/Saving_Iptables_Firewall_Rules_Permanently)
+
+### Allow a port
+
+Change *tcp* to *udp* if you need UDP.
+
+```bash
+sudo iptables -I INPUT -p tcp --dport PORT_NUMBER_HERE -j ACCEPT
+```
+
+### Permanently save Iptables
+
+You need to have the *iptables-persistent* package installed (`apt install iptables-persistent`).
+
+On debian-based distro, run as root:
+ - IPv4:
+```bash
+iptables-save > /etc/iptables/rules.v4
+```
+ - IPv6:
+```bash
+ip6tables-save > /etc/iptables/rules.v6
+```
+
+### Restore Iptables from file
+
+On debian-based distro, as root:
+```bash
+iptables-restore < /etc/iptables/rules.v4
+```
