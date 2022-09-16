@@ -4,6 +4,7 @@
 I. Specific DE/distro/hardware etc. problems:
   1. [GNOME](https://github.com/sabinM1/linux-pro-tips/blob/master/GNOME.md)
   2. [Arduino](https://github.com/sabinM1/linux-pro-tips/blob/master/Arduino.md)
+  3. [Xfce](https://github.com/sabinM1/linux-pro-tips/blob/master/Xfce.md)
 
 II. General:
   1. [Wake-on-LAN with NetworkManager](#wake-on-lan-with-networkmanager)
